@@ -19,7 +19,8 @@ from linebot.models import (
     PostbackEvent,
     JoinEvent,
     MemberJoinedEvent,
-    TextSendMessage
+    TextSendMessage,
+    ImageSendMessage
 )
 
 from .pushmsg import (
@@ -61,10 +62,16 @@ def callback(request):
                         gamechoice()
                     )
                 elif var.Gameset ==None:
-                    line_bot_api.reply_message(
+                    if reply=="fsm":
+                        line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(text="輸入menu可進入選單"),
+                        ImageSendMessage(original_content_url='https://i.imgur.com/TFwXPnh.png', preview_image_url='https://i.imgur.com/TFwXPnh.png')
                     )
+                    else:
+                        line_bot_api.reply_message(
+                            event.reply_token,
+                            TextSendMessage(text="輸入menu可進入選單"),
+                        )
                 else:
                     if var.Gameset == "Bomb":
                         result = Bomb.process(event.source.user_id,reply)
