@@ -77,17 +77,16 @@ def callback(request):
                         result = Bomb.process(event.source.user_id,reply)
                     elif var.Gameset == "BigTwo":
                         result = BigTwo.process(event.source.user_id,reply)                
-                    elif var.Gameset =="Wolf":
-                        
+                    elif var.Gameset =="Wolf":   
                         result = Wolf.process(event.source.user_id,reply)
-                    if result!=False:
-                            line_bot_api.reply_message(  # 回復傳入的訊息文字
-                                event.reply_token, [
-                                    TextSendMessage(text=result[0]),
-                                ]
-                            )       
-                    if result[1] == True:
-                        var.Gameset = None
+                    if result!=False and type(result) is list:
+                        line_bot_api.reply_message(  # 回復傳入的訊息文字
+                            event.reply_token, [
+                                TextSendMessage(text=result[0]),
+                            ]
+                        )       
+                        if result[1] == True:
+                            var.Gameset = None
                 # # else:
                 #     # modelset.get_user_id(event.source.user_id)
                 #     # postsend.user_post(event.source.user_id,1,"123")
@@ -102,7 +101,7 @@ def callback(request):
                 #     # )
             elif isinstance(event, MemberJoinedEvent) or isinstance(event,FollowEvent):
                 # save the user id into models
-                welcome = postsend.getprofile(event.source.user_id)
+                welcome = postsend.groupprofile(event.source.user_id)
                 print(event)
                 line_bot_api.reply_message(  # 回復傳入的訊息文字
                     event.reply_token,

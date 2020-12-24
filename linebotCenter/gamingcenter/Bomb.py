@@ -42,13 +42,19 @@ def process(id,reply):
         return ["請輸入min max值(以空格分開 min最小為0)", False]
     elif state == 0:
         state += 1
-        rangenum = reply.split()
-        print(rangenum)
-        return [number_gen(int(rangenum[0]), int(rangenum[1]))+"\n請輸入數字", False]
+        return getrange(reply)
     else:
-        name = modelset.groupnickname(id)
-        replystring = check_number(int(reply), name)
-        if state == -1:
-            return [replystring, True]
-        else:
-            return[replystring, False]
+        return gamesection(reply)
+
+def getrange(reply):
+    rangenum = reply.split()
+    print(rangenum)
+    return [number_gen(int(rangenum[0]), int(rangenum[1]))+"\n請輸入數字", False]
+
+def gamesection(reply):
+    name = modelset.groupnickname(id)
+    replystring = check_number(int(reply), name)
+    if state == -1:
+        return [replystring, True]
+    else:
+        return[replystring, False]
