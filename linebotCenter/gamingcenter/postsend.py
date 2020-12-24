@@ -15,20 +15,6 @@ def groupprofile(userid):
     reply =modelset.createdata(userid,tmpdn)
     return reply
 
-def userprofile(userid):
-    profile_data = {'Authorization': 'Bearer ' + settings.USER_CHANNEL['LINE_CHANNEL_ACCESS_TOKEN']}
-    profile = requests.get(API_PROFILE+ userid, headers=profile_data)
-    tmpdn=profile.json()['displayName']
-    print(tmpdn)
-    reply =modelset.firstconnect(userid,tmpdn)
-    return reply
-
-
-
-def changename(userid,name):
-    reply =modelset.updatedn(userid,name)
-    return reply
-
 #test
 def user_post(userid, backmode, text):
     data = {
