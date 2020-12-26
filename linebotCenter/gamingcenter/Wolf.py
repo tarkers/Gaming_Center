@@ -13,7 +13,7 @@ gamestate = 0
 center_ids = {}
 wolf_ids = []
 role_data = {}
-number = 0
+canvote = 0
 votenum = 0
 nightskillnum = 0
 t_nightskillnum = 0
@@ -24,6 +24,8 @@ shouldkill = False
 dayclock = False
 vote = {}
 skillactive=False
+endgame=False
+halt=False
 
 def initial_role(role):
     rolelist = {
@@ -72,7 +74,6 @@ def initial_role(role):
             "onetimeskill": True,
             "lastspeak": True,
             "canvote": True,
-            "vote": False
         },
         "守衛": {
             "userid": "",
@@ -105,14 +106,14 @@ def initial_role(role):
 
 
 def test():
-    global center_ids, number, role_data, state, t_nightskillnum, wolf_ids
+    global center_ids, canvote, role_data, state, t_nightskillnum, wolf_ids
     wolf_ids = ["1"]
     t_nightskillnum = 2
     state = 2
-    number = 4
-    center_ids = {"1": "1", "2": "2", "3": "3","4": "pp"}
+    canvote = 4
+    center_ids = {"1": "我是阿罵", "2": "2", "3": "3","4": "pp"}
     role_data = {
-        "1": {
+        "我是阿罵": {
             "nightskill": False,
             "userid": "1",
             "role": "狼人",
@@ -160,7 +161,7 @@ test()
 
 
 def process(userid, reply):
-    global state, role_data, number, center_ids, main, wolf_ids, nightskill, t_nightskillnum
+    global state, role_data, canvote, center_ids, main, wolf_ids, nightskill, t_nightskillnum
     if state == -2:
         state += 1
         main = userid  # set the 管理員
@@ -169,21 +170,21 @@ def process(userid, reply):
         state += 1
         return ["請輸入遊玩人數", False]
     elif state == 0:
-        number = int(reply)
-        if isinstance(number, int):
+        canvote = int(reply)
+        if isinstance(canvote, int):
             state += 1
             return ["請要遊玩的人說HI", False]
         else:
             return["請輸入正確數字", False]
-    elif len(center_ids) < number:
+    elif len(center_ids) < canvote:
         if userid in center_ids:
-            return["您已加入了，還剩"+str(number-len(center_ids))+"位", False]
+            return["您已加入了，還剩"+str(canvote-len(center_ids))+"位", False]
         else:
             center_ids[userid] = modelset.getnickname(userid)
-            if len(center_ids) == number:
+            if len(center_ids) == canvote:
                 return["管理員請輸入角色數量\n ex:[狼人X1 平民X3 預言家X1]", False]
             else:
-                return["收到，還剩"+str(number-len(center_ids))+"位", False]
+                return["收到，還剩"+str(canvote-len(center_ids))+"位", False]
     elif state == 1:
         if userid != main:
             return["請管理員輸入角色", False]
@@ -213,13 +214,15 @@ def process(userid, reply):
 
 
 def gamesection(userid, reply):
-    global gamestate
-    if gamestate == 0:
+    global gamestate,halt
+    if halt:
+        return
+    elif gamestate == 0:
         if discuss(userid, reply):
             gamestate=2
     elif gamestate == 1:
-        if dayvote(userid, reply):
-            gamestate += 1
+        if "==" in reply:
+            dayvote(userid, reply)          
     elif gamestate == 2:
         if wolfdiscuss(userid, reply):
             gamestate += 1
@@ -230,7 +233,7 @@ def gamesection(userid, reply):
 
 
 def discuss(userid, reply):
-    global dayclock, role_data, center_ids,wolf_ids,number
+    global dayclock, role_data, center_ids,wolf_ids,canvote,skillactive,t_nightskillnum
     nickname = center_ids[userid]
     if role_data[nickname]["die"]>1:
         postsend.user_post(userid, "text", "你遺言交代完了，閉嘴")
@@ -238,72 +241,80 @@ def discuss(userid, reply):
         dayclock = True
         action_thread = Thread(target=dayandnight)
         action_thread.start()
-    if role_data[nickname]["die"] == 1:
+    if role_data[nickname]["die"] == 1 and  "==" in reply:
         role_data[nickname]["die"] = 2
-        postsend.multi_post(center_ids.keys(), ["text"], [nickname+"的遺言: "+reply])
-    else:
-        if "==" in reply and role_data[nickname]["role"]=="騎士":
-            reply=reply.replace("==","")
-            number-=1
-            role_data[nickname]["onetimeskill"]=False
-            if role_data[reply]["role"] =="狼人":
-                role_data[reply]["die"]=2
-                wolf_ids.remove(role_data[reply]["userid"])
-                if not checkwin(reply+"已被放逐"):
-                    postsend.multi_post(center_ids.keys(), ["text","text"], ["公告: "+nickname+"是騎士，殺掉狼人"+reply,"進入黑夜"])
-                    
-                return True
-            else:
-                role_data[nickname]["onetimeskill"]=False
-                role_data[nickname]["die"]=2
-                if not checkwin(nickname+"誤殺好人"+reply+"，以死謝罪"):
-                    postsend.multi_post(center_ids.keys(), ["text"], ["公告: "+nickname+"是騎士，殺到好人"+reply+"，以死謝罪"])
-                return False
+        if role_data[nickname]["role"]=="獵人" :
+            canvote-=1         
+            hunterskill(reply,nickname)  
         else:
-            postsend.multi_post(center_ids.keys(), ["text"], [nickname+": "+reply])
+            postsend.multi_post(center_ids.keys(), ["text"], [nickname+"的遺言: "+reply])
+    elif "==" in reply:
+        reply=reply.replace("==","")
+        if role_data[nickname]["role"]=="騎士":      
+            canvote-=1
+            return knightskill(reply,nickname)
+                
+    else:
+        postsend.multi_post(center_ids.keys(), ["text"], [nickname+": "+reply])
     return False
 
 
 def dayvote(userid, reply):
-    global vote, votenum, center_ids, number, role_data, t_nightskillnum
+    global vote, votenum, center_ids, canvote, role_data, t_nightskillnum,kill
     nickname=center_ids[userid]
-    if role_data[nickname]["die"]!=0:
+    reply = reply.replace("==", "")
+    if  role_data[nickname]["role"]=="獵人" and role_data[nickname]["die"] == 1:
+        role_data[nickname]["die"]=2
+        hunterskill(reply,nickname)  
+    elif role_data[nickname]["die"]!=0:
         postsend.user_post(userid, "text", "你已經沒用處了，閉嘴")
-    elif "==" in reply:
-        reply = reply.replace("==", "")
-        if reply not in list(center_ids.values()):
-            postsend.user_post(userid, "text", "沒有此人喔")
-        elif role_data[nickname]["vote"]:
-            postsend.user_post(userid, "text", "你已經投過票了，別想騙我")    
+    elif reply not in list(center_ids.values()):
+        postsend.user_post(userid, "text", "沒有此人喔")
+    elif role_data[nickname]["vote"]:
+        postsend.user_post(userid, "text", "你已經投過票了，別想騙我")    
+    else:
+        role_data[nickname]["vote"]=True
+        votenum += 1
+        if reply not in vote:
+            vote[reply] = 1
         else:
-            role_data[nickname]["vote"]=True
-            votenum += 1
-            if reply not in vote:
-                vote[reply] = 1
-            else:
-                vote[reply] += 1
-            if votenum == number:
-                die = max(vote, key=vote.get)
-                votenum = 0
-                vote = {}
-                resetvote()
-                if role_data[die]["nightskill"]:
-                    t_nightskillnum -= 1
-                elif role_data[die] == "狼人":
-                    wolf_ids.remove(role_data[die]["userid"])
-                number -= 1
-                role_data[die]["die"] = 1
-                if not checkwin(die+"已被放逐"):
-                    postsend.user_post(role_data[die]["userid"], "text", askquestion('kill'))
-                    if role_data[die]["role"]=="獵人":
-                        role_data[die]['onetimeskill']=False
-                        postsend.user_post(role_data[kill]["userid"], "text", askquestion('獵人'))
-                    postsend.multi_post(center_ids.keys(), ["text", "text"], [die+"已被放逐", "夜晚降臨，狼人請討論"])
-                return True
-            else:
-                postsend.multi_post(center_ids.keys(), ["text"], [reply+"多一票"])
-    return False
+            vote[reply] += 1
+        if votenum == canvote:
+            kill = max(vote, key=vote.get)
+            votenum = 0
+            vote = {}
+            if role_data[kill]["nightskill"]:
+                t_nightskillnum -= 1
+            elif role_data[kill] == "狼人":
+                wolf_ids.remove(role_data[kill]["userid"])
+            canvote -= 1
+            role_data[kill]["die"] = 1
+            if not checkwin(kill+"已被放逐"):  
+                postsend.multi_post(center_ids.keys(), ["text","text"], [kill+"即將被放逐","請公民禁聲，10秒後夜晚來臨"])    
+                if role_data[kill]["role"]=="獵人":
+                    role_data[kill]['onetimeskill']=False
+                    postsend.user_post(role_data[kill]["userid"], "text", askquestion('獵人'))
+                elif role_data[kill]["role"]=="白痴" and role_data[kill]['onetimeskill']==True:
+                    canvote-=1
+                    role_data[kill]["onetimeskill"]=False
+                    postsend.multi_post(center_ids.keys(), ["text"], ["公告: "+kill+"是白痴，免除這次放逐，但失去投票權"])
+                else:                      
+                    postsend.user_post(role_data[kill]["userid"], "text", askquestion('kill'))
+                    kill=""
+                tovote(2)
+                halt_state(10,"夜晚降臨，狼人請討論")
+        else:
+            postsend.multi_post(center_ids.keys(), ["text"], [reply+"多一票"])
 
+def tovote(mode):
+    global role_data
+    for key,value in role_data.items():
+        if value["die"]==1 and mode==1:
+            value["die"]=2
+        elif value["role"]=="白痴" and value["onetimeskill"]==False:
+            value["vote"]=True
+        else:
+            value["vote"]=False
 
 def wolfdiscuss(userid, reply):
     global votenum, vote, center_ids, role_data, kill, shouldkill
@@ -332,7 +343,6 @@ def wolfdiscuss(userid, reply):
                     shouldkill = True
                     votenum = 0
                     vote = {}
-                    resetvote()
                     postsend.multi_post(wolf_ids, ["text"], ["討論結束，"+die+"被殺"])
                     postsend.multi_post(center_ids.keys(), ["text"], ["夜晚神職人員出動"])
                     for key, value in role_data.items():
@@ -353,7 +363,7 @@ def wolfdiscuss(userid, reply):
 
 def nightskill(userid, reply):
     global nightskillnum, t_nightskillnum, center_ids, role_data, kill, shouldkill,\
-        witchkill, number
+        witchkill, canvote
     nickname = center_ids[userid]
     if role_data[nickname]["die"]!=0:
             postsend.user_post(userid, "text", "你已經沒用處了，閉嘴")
@@ -422,7 +432,7 @@ def nightskill(userid, reply):
                         wolf_ids.remove(role_data[ppl]["userid"])
                     elif role_data[ppl]["nightskill"]:
                         t_nightskillnum -= 1
-                    number -= 1
+                    canvote -= 1
                     if not checkwin(ppl+"被殺了"):
                         postsend.multi_post(center_ids.keys(), ["text","text"], [ppl+"被殺了","進入白天"])
                         postsend.user_post(role_data[ppl]["userid"], "text", askquestion('kill'))
@@ -436,9 +446,35 @@ def nightskill(userid, reply):
         return True
     return False
 
+def knightskill(reply,nickname):
+    global role_data,center_ids,skillactive
+    role_data[nickname]["onetimeskill"]=False
+    if role_data[reply]["role"] =="狼人":
+        role_data[reply]["die"]=2
+        wolf_ids.remove(role_data[reply]["userid"])
+        if not checkwin("公告: "+nickname+"是騎士，殺掉狼人"+reply):
+            skillactive=True
+            postsend.multi_post(center_ids.keys(), ["text","text"], ["公告: "+nickname+"是騎士，殺掉狼人"+reply,"進入黑夜"])              
+        return True
+    else:
+        role_data[nickname]["onetimeskill"]=False
+        role_data[nickname]["die"]=2
+        postsend.multi_post(center_ids.keys(), ["text"], ["公告: "+nickname+"是騎士，殺到好人"+reply+"，以死謝罪"])
+        return False
+
+def hunterskill(reply,nickname):
+    global role_data,center_ids,t_nightskillnum
+    role_data[nickname]["onetimeskill"]=False
+    role_data[reply]["die"]=1
+    if role_data[reply]["role"] =="狼人":
+        wolf_ids.remove(role_data[reply]["userid"])
+    elif role_data[reply]["nightskill"]:
+        t_nightskillnum-=1
+    if not checkwin("公告: "+nickname+"是獵人，開槍帶走"+reply):
+        postsend.multi_post(center_ids.keys(), ["text"], ["公告: "+nickname+"是獵人，開槍帶走"+reply])
 
 def checkwin(line):
-    global role_data
+    global role_data,endgame
     haswolf = False
     hasgood = False
     mode = 0
@@ -460,6 +496,7 @@ def checkwin(line):
         postsend.multi_post(center_ids.keys(), ["text"], [line])
         postsend.multi_post(center_ids.keys(), ["text", "text", "text"], [
                             mode, "遊戲結束", "真相公布:"+truth])
+        endgame=True
         return True
     else:
         return False
@@ -471,17 +508,26 @@ def resetvote():
 
 def askquestion(role):
     question = {
-        "ALL": "請討論要放逐的人，決定好請打上(==要放逐的名字)",
+        "Vote": "請討論要放逐的人，決定好請打上(==要放逐的名字)",
         "狼人": "請討論你要殺的人，決定好請打上(==要殺的名字)",
         "kill": "請在白天說出你的遺言",
         "預言家": "選擇想查驗的人,打上(==發動的名字)",
         "女巫": "毒殺or救贖誰(方式ex:==毒殺_發動的名字)",
         "獵人": "是否開槍,打上(==發動的名字，若不要發動，則不需輸入)",
-        "騎士": "要跟誰決鬥,打上(==發動的名字，若不要發動，請打==XX)",
+        "騎士": "要跟誰決鬥,打上(==發動的名字，若不要發動，則不需輸入)",
         "守衛": "你要守護誰,打上(==發動的名字)",
     }
     return question[role]
 
+
+def halt_state(canvote,line):
+    global center_ids, gamestate,halt,endgame
+    halt=True
+    time.sleep(canvote)
+    gamestate += 1
+    halt=False
+    if not endgame:
+        postsend.multi_post(center_ids.keys(), ["text"], [line])
 
 def dayandnight():
     global center_ids, gamestate, dayclock,skillactive
@@ -503,6 +549,7 @@ def dayandnight():
             night_event.set()
             gamestate += 1
             dayclock = False
-            postsend.multi_post(center_ids.keys(), ["text"], [askquestion("ALL")])
+            tovote(1)
+            postsend.multi_post(center_ids.keys(), ["text"], [askquestion("Vote")])
             break
 
