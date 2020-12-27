@@ -11,8 +11,10 @@ API_PROFILE="https://api.line.me/v2/bot/profile/"
 def groupprofile(userid):
     profile_data = {'Authorization': 'Bearer ' + settings.GROUP_CHANNEL['LINE_CHANNEL_ACCESS_TOKEN']}
     profile = requests.get(API_PROFILE+ userid, headers=profile_data)
+    
     tmpdn=profile.json()['displayName']
     reply =modelset.createdata(userid,tmpdn)
+    print(tmpdn)
     return reply
 
 #test

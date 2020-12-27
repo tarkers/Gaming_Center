@@ -10,6 +10,7 @@ def createdata(ud, dn):
     else:
         data = MemberData.objects.filter(userid=ud)
         data.update(displayname=dn)
+        return "您的資料已更新，可在gaminguser改暱稱"
 
 
 def firstconnect(ud,dn):

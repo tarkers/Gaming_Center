@@ -99,10 +99,12 @@ def callback(request):
                 #     #         TextSendMessage(text=result),
                 #     #     ]
                 #     # )
+            # elif isinstance(event,UnfollowEvent):
+            #     print(123456)
             elif isinstance(event, MemberJoinedEvent) or isinstance(event,FollowEvent):
                 # save the user id into models
                 welcome = postsend.groupprofile(event.source.user_id)
-                print(event)
+                print(welcome)
                 line_bot_api.reply_message(  # 回復傳入的訊息文字
                     event.reply_token,
                     [
