@@ -56,22 +56,21 @@ def callback(request):
                 print(event.source.user_id)
                 reply = event.message.text
                 result=False
-                if var.Gameset == None and reply.rstrip() == "menu":     # user check the game mode
+                if reply=="fsm":
+                    line_bot_api.reply_message(
+                    event.reply_token,
+                    ImageSendMessage(original_content_url='https://i.imgur.com/TFwXPnh.png', preview_image_url='https://i.imgur.com/TFwXPnh.png')
+                )      
+                elif var.Gameset == None and reply.rstrip() == "menu":     # user check the game mode
                     line_bot_api.reply_message(
                         event.reply_token,
                         gamechoice()
                     )
                 elif var.Gameset ==None:
-                    if reply=="fsm":
-                        line_bot_api.reply_message(
+                    line_bot_api.reply_message(
                         event.reply_token,
-                        ImageSendMessage(original_content_url='https://i.imgur.com/TFwXPnh.png', preview_image_url='https://i.imgur.com/TFwXPnh.png')
+                        TextSendMessage(text="輸入menu可進入選單"),
                     )
-                    else:
-                        line_bot_api.reply_message(
-                            event.reply_token,
-                            TextSendMessage(text="輸入menu可進入選單"),
-                        )
                 else:
                     if var.Gameset == "Bomb":
                         result = Bomb.process(event.source.user_id,reply)

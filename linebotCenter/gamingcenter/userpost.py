@@ -17,7 +17,9 @@ def changename(userid,name):
     reply =modelset.updatedn(userid,name)
     return reply
 def user_response(userid,reply):
-    if  var.Gameset=="BigTwo":
+    if reply =="我的名字":
+        return modelset.getnickname(userid)
+    elif  var.Gameset=="BigTwo":
         if BigTwo.check_id(userid)==False:
             return
         else:
