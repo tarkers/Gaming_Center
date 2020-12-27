@@ -18,7 +18,7 @@ def groupprofile(userid):
 #test
 def user_post(userid, backmode, text):
     data = {
-        "to": 'U6f785ac264021840cba6bb56b334b95d',#userid,
+        "to": userid,
         "messages": [
             {
                 "type": "text",
@@ -34,8 +34,8 @@ def user_post(userid, backmode, text):
 
 def multi_post(userlist,backmode,text):
     #test 
-    userlist=[]
-    userlist.append('U6f785ac264021840cba6bb56b334b95d')
+    # userlist=[]
+    # userlist.append('U6f785ac264021840cba6bb56b334b95d')
     data={}
     data["to"]=userlist
     data["messages"]=[]

@@ -56,7 +56,7 @@ def callback(request):
                 print(event.source.user_id)
                 reply = event.message.text
                 result=False
-                if reply=="fsm":
+                if reply=="fsm" :
                     line_bot_api.reply_message(
                     event.reply_token,
                     ImageSendMessage(original_content_url='https://i.imgur.com/TFwXPnh.png', preview_image_url='https://i.imgur.com/TFwXPnh.png')

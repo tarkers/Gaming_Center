@@ -40,19 +40,7 @@ def callback(request):
                 )
             elif isinstance(event, MessageEvent):  # 如果有訊息事件
                 reply = event.message.text
-                if "轉換" in reply:
-                    var.test = not var.test
-                    if var.test == True:
-                        line_bot_api.reply_message(  # 回復傳入的訊息文字
-                            event.reply_token,
-                            TextSendMessage(text="現在是測試模式")
-                        )
-                    else:
-                        line_bot_api.reply_message(  # 回復傳入的訊息文字
-                            event.reply_token,
-                            TextSendMessage(text="現在是正式模式")
-                        )
-                elif "**" in reply:
+                if "**" in reply:
                     reply = reply.replace("*", "")
                     response = userpost.changename(event.source.user_id, reply)
                     line_bot_api.reply_message(  # 回復傳入的訊息文字
@@ -67,12 +55,8 @@ def callback(request):
                         TextSendMessage(text="您的暱稱:"+response)
                     )
                 else:
-                    if var.test == False:
-                        userpost.user_response(event.source.user_id, reply)
-                    else:
-                        reply = reply.split(" ")
-                        # postsend.user_response(event.source.user_id,reply)
-                        userpost.user_response(reply[0], reply[1])
+                    userpost.user_response(event.source.user_id, reply)
+                    
         return HttpResponse()
     else:
         return HttpResponseBadRequest()
