@@ -33,7 +33,7 @@ def updatedn(ud, nn):
     else:
         data = MemberData.objects.filter(userid=ud)
         data.update(nickname=nn)
-        return "您的暱稱改為: "+nn
+        return "您的暱稱改為: "+nn+"\n查詢匿名請輸入:\n我的名字"
 
 def deluser(ud):
     data=MemberData.objects.filter(userid=ud)[0]
