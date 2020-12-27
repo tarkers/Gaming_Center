@@ -152,7 +152,7 @@ def process(userid, reply):
         else:
             center_ids[userid] = modelset.getnickname(userid)
             if len(center_ids) == canvote:
-                return["管理員請輸入角色數量\n ex:[狼人X1 平民X3 預言家X1]", False]
+                return["管理員請輸入角色\n ex:[狼人X1 平民X3 預言家X1]", False]
             else:
                 return["收到，還剩"+str(canvote-len(center_ids))+"位", False]
     elif state == 1:

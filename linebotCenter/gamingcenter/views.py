@@ -55,35 +55,48 @@ def callback(request):
             elif isinstance(event, MessageEvent):  # 如果有訊息事件
                 print(event.source.user_id)
                 reply = event.message.text
-                result=False
-                if reply=="fsm" :
+                result = False
+                if reply == "fsm":
                     line_bot_api.reply_message(
-                    event.reply_token,
-                    ImageSendMessage(original_content_url='https://i.imgur.com/TFwXPnh.png', preview_image_url='https://i.imgur.com/TFwXPnh.png')
-                )      
+                        event.reply_token,
+                        ImageSendMessage(original_content_url='https://i.imgur.com/TFwXPnh.png',
+                                         preview_image_url='https://i.imgur.com/TFwXPnh.png')
+                    )
+                elif reply == "說明":
+                    result = "數字炸彈:大家輪流說數字，若數字和炸彈一樣將會引爆\n" +\
+                        "大老二:找2-4個人遊玩，就是一般的大老二\n" +\
+                        "簡易狼人殺: 角色如下圖"
+                    line_bot_api.reply_message(
+                        event.reply_token,
+                        [
+                            TextSendMessage(text=result),
+                            ImageSendMessage(original_content_url='https://i.imgur.com/G3lotEo.png',
+                                         preview_image_url='https://i.imgur.com/G3lotEo.png')
+                        ]
+                    )
                 elif var.Gameset == None and reply.rstrip() == "menu":     # user check the game mode
                     line_bot_api.reply_message(
                         event.reply_token,
                         gamechoice()
                     )
-                elif var.Gameset ==None:
+                elif var.Gameset == None:
                     line_bot_api.reply_message(
                         event.reply_token,
                         TextSendMessage(text="輸入menu可進入選單"),
                     )
                 else:
                     if var.Gameset == "Bomb":
-                        result = Bomb.process(event.source.user_id,reply)
+                        result = Bomb.process(event.source.user_id, reply)
                     elif var.Gameset == "BigTwo":
-                        result = BigTwo.process(event.source.user_id,reply)                
-                    elif var.Gameset =="Wolf":   
-                        result = Wolf.process(event.source.user_id,reply)
-                    if result!=False and type(result) is list:
+                        result = BigTwo.process(event.source.user_id, reply)
+                    elif var.Gameset == "Wolf":
+                        result = Wolf.process(event.source.user_id, reply)
+                    if result != False and type(result) is list:
                         line_bot_api.reply_message(  # 回復傳入的訊息文字
                             event.reply_token, [
                                 TextSendMessage(text=result[0]),
                             ]
-                        )       
+                        )
                         if result[1] == True:
                             var.Gameset = None
                 # # else:
@@ -98,7 +111,7 @@ def callback(request):
                 #     #         TextSendMessage(text=result),
                 #     #     ]
                 #     # )
-            elif isinstance(event, MemberJoinedEvent) or isinstance(event,FollowEvent):
+            elif isinstance(event, MemberJoinedEvent) or isinstance(event, FollowEvent):
                 # save the user id into models
                 welcome = postsend.groupprofile(event.source.user_id)
                 print(event)
