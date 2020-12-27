@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-
+import django_heroku
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CENTER_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+"\\gamingcenter"
@@ -26,8 +26,7 @@ SECRET_KEY = 'v7o$*g)_n^_kg)9fpxaygs3clc8h$9o+w*ko!mogq=c#t)g!io'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '97ee9d3c1aff.ngrok.io',
-    'game1117.herokuapp.com'
+    '*'
 ]
 
 # LINE_CHANNEL_ACCESS_TOKEN = '0CGVjzllPKIDsZwGhWm2znjw0JnL6ep9DzhPTu0ve4F2XpXBGCn6mn1E4HrUG1o8lK8+wJRQ5EnHhGJYcxrmMMp0sVbAMf51CvnhRajD0jOZkW0rd3hP/8rewl8MVkgv2Qa8SyXV/Vox2VSgEyA87AdB04t89/1O/w1cDnyilFU='
@@ -38,9 +37,10 @@ GROUP_CHANNEL = {
     'LINE_CHANNEL_SECRET': 'cbc68547035ab846b8d27534c55d0cec'
 }
 USER_CHANNEL = {
-    'LINE_CHANNEL_ACCESS_TOKEN': '8utAAhVIOd5g3H8HZJwB5DBypUpucsCjmYSni6beR2hn99mUeslA6TwQBpBc2xXsb45Gvem57Z+Q+/foQwOBXGsCZyNl7NA+H7eu+/Wa89SUxVbwXyCDcdh2bDTwLQME3N5nxmSYkl9pgl+NMpSedQdB04t89/1O/w1cDnyilFU=',
-    'LINE_CHANNEL_SECRET': '858ad0fcf53a2e6c30257656b71ecfbe'
+    'LINE_CHANNEL_ACCESS_TOKEN': 'Ru7/VEWhnvf2LXlYtp7fkYvf6jGj2atEagiLvFVZwUMdOz49DDnEovuAjQDOg1D5TOj2IEtm4kL+q7t8TbK05dKyaVRvO01OBBMOp4kZ9W+Ya5nxUq3uKMc7vKnixA9qJq9n+U+qWNOMBuloOYHn5AdB04t89/1O/w1cDnyilFU=',
+    'LINE_CHANNEL_SECRET': '7fe9f31729efd76c3566230047a2b055'
 }
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -132,3 +132,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
+django_heroku.settings(locals())
