@@ -26,7 +26,8 @@ SECRET_KEY = 'v7o$*g)_n^_kg)9fpxaygs3clc8h$9o+w*ko!mogq=c#t)g!io'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '97ee9d3c1aff.ngrok.io'
+    '97ee9d3c1aff.ngrok.io',
+    'game1117.herokuapp.com'
 ]
 
 # LINE_CHANNEL_ACCESS_TOKEN = '0CGVjzllPKIDsZwGhWm2znjw0JnL6ep9DzhPTu0ve4F2XpXBGCn6mn1E4HrUG1o8lK8+wJRQ5EnHhGJYcxrmMMp0sVbAMf51CvnhRajD0jOZkW0rd3hP/8rewl8MVkgv2Qa8SyXV/Vox2VSgEyA87AdB04t89/1O/w1cDnyilFU='
