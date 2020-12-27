@@ -23,5 +23,4 @@ def user_response(userid,reply):
         else:
             BigTwo.gamesection(userid,reply)
     elif var.Gameset =="Wolf":
-        print(userid,reply)
         Wolf.gamesection(userid,reply)

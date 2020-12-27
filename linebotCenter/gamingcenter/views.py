@@ -107,7 +107,7 @@ def callback(request):
                     event.reply_token,
                     [
                         TextSendMessage(text=welcome),
-                        TextSendMessage(text='https://lin.ee/LjttLOH')
+                        TextSendMessage(text='https://lin.ee/0wV3Kd4')
                     ]
                 )
             elif isinstance(event, JoinEvent):
