@@ -1,15 +1,6 @@
-"""
-WSGI config for linebotCenter project.
-
-It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/3.0/howto/deployment/wsgi/
-"""
-
 import os
-
 from django.core.wsgi import get_wsgi_application
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'linebotCenter.settings')
+from dj_static import Cling # <- 加入
 
-application = get_wsgi_application()
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
+application = Cling(get_wsgi_application()) # <- 修改
